@@ -1,6 +1,118 @@
-# Getting Started with Create React App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# React Admin Panel with Authentication
+
+This project is an admin panel built with React, Material-UI, and MongoDB. It includes authentication for admins, CRUD operations for managing pages, and image uploads. Below is a step-by-step guide on how to use and navigate through the admin panel.
+
+## Features
+
+- **Admin Authentication:** Admins can log in and register with a secret code.
+- **Page Management:** Create, edit, and delete pages with HTML content and images.
+- **Pagination:** View pages with pagination (10 pages per view).
+- **Image Upload:** Upload images and reference them within the HTML content.
+- **Logout:** Admins can securely log out of the system.
+
+## Prerequisites
+
+Before starting, make sure you have the following installed:
+
+- [Node.js](https://nodejs.org/) (v14+)
+- [Docker](https://www.docker.com/)
+- [MongoDB](https://www.mongodb.com/)
+
+## Installation
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/yourusername/your-repo.git
+cd your-repo
+```
+
+### Install Dependencies
+
+```bash
+npm install
+```
+
+### Set Up Environment Variables
+
+Create a `.env` file in the root of your project and add the following variables:
+
+can install my server https://github.com/Denisphuket/page-generator-server
+
+```
+REACT_APP_API_URL=
+```
+
+### Run the Application
+
+To start the application locally, use:
+
+```bash
+npm start
+```
+
+## Usage
+
+### 1. Registration & Login
+
+When you first launch the admin panel, you'll be greeted with the registration screen. Here, you can create a new admin account using a secret code.
+
+![Registration](./images/registration.png)
+
+If you already have an account, switch to the login screen.
+
+![Login](./images/login.png)
+
+### 2. Admin Panel
+
+After successful login, you'll be directed to the admin panel where you can manage pages. This includes creating new pages, editing existing ones, and deleting pages.
+
+![Admin Panel](./images/admin-panel.png)
+
+### 3. Page Management
+
+#### Creating a New Page
+
+To create a new page, click on the "Create New Page" button.
+
+![Create Page](./images/page-create.png)
+
+#### Editing an Existing Page
+
+Click the edit icon next to any page to modify its content. The editor allows you to change the title, path, HTML content, and manage images.
+
+![Edit Page](./images/page.png)
+
+### 4. Preview & Link
+
+Next to the edit icon, there is an icon to view the page. This allows you to directly view how the page looks on the front end.
+
+### 5. Pagination
+
+The admin panel supports pagination, showing 10 pages per view. Navigate through pages using the pagination control at the bottom.
+
+### 6. Logout
+
+You can securely log out of the admin panel by clicking the "Logout" button on the top-right corner of the admin panel.
+
+---
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## Contact
+
+If you have any questions or feedback, feel free to reach out:
+
+- **GitHub:** [Denisphuket](https://github.com/Denisphuket)
+
+---
+
+**Happy Coding!**
 
 ## Available Scripts
 
