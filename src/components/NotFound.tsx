@@ -1,9 +1,12 @@
 import React from 'react';
 import { Container, Typography, Box } from '@mui/material';
+import {Helmet} from "react-helmet-async";
 
 const NotFound: React.FC = () => {
   return (
+
     <Container maxWidth="sm">
+      <Helmet><title>404 - Страница не найдена</title></Helmet>
       <Box
         display="flex"
         flexDirection="column"

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, Typography, Container, Paper, Box, Pagination } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -8,104 +8,84 @@ import AuthService from '../services/AuthService';
 import LogoutIcon from '@mui/icons-material/Logout';
 import Login from './Login';
 import Register from './Register';
-import Loader from './Loader';
+import { Helmet } from 'react-helmet-async';
 
 const AdminPanel: React.FC = () => {
   const [pages, setPages] = useState<any[]>([]);
   const [editingPage, setEditingPage] = useState<any | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(AuthService.getToken() ? true : false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [page, setPage] = useState(1); // Текущая страница
   const [totalPages, setTotalPages] = useState(1); // Общее количество страниц
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const token = AuthService.getToken();
-      if (token) {
-        try {
-          await AuthService.verifyToken(token);
-          setIsAuthenticated(true);
-        } catch (error) {
-          AuthService.logout();
-          setIsAuthenticated(false);
-        }
-      }
-      setIsLoading(false);
-    };
-    checkAuth();
-  }, []);
+    fetchPages(page);
+  }, [page]);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchPages(page);
-    }
-  }, [isAuthenticated, page]);
-
-  const fetchPages = async (pageNumber: number) => {
+  const fetchPages = useCallback(async (pageNumber: number) => {
     try {
       const response = await PageService.getPages(pageNumber, 10); // Передаем номер страницы и лимит
       setPages(response.pages);
       setTotalPages(response.pagesCount);
     } catch (error) {
       console.error(error);
+    } finally {
     }
-  };
+  }, []);
 
-  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+  const handlePageChange = useCallback((event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
-  };
+  }, []);
 
-  const handleEdit = (page: any) => {
+  const handleEdit = useCallback((page: any) => {
     setEditingPage(page);
     setIsEditorOpen(true);
-  };
+  }, []);
 
-  const handleCreate = () => {
+  const handleCreate = useCallback(() => {
     setEditingPage(null);
     setIsEditorOpen(true);
-  };
+  }, []);
 
-  const handleSave = async (page: any) => {
+  const handleSave = useCallback(async (page: any) => {
     await PageService.savePage(page);
     fetchPages(page);
     setIsEditorOpen(false);
-  };
+  }, [fetchPages]);
 
-  const handleDelete = async (pageId: string) => {
+  const handleDelete = useCallback(async (pageId: string) => {
     await PageService.deletePage(pageId);
     fetchPages(page);
-  };
+  }, [fetchPages, page]);
 
-  const handleLogin = () => {
+  const handleLogin = useCallback(() => {
     setIsAuthenticated(true);
-    setIsLoading(false);
-  };
+  }, []);
 
-  const handleRegister = () => {
+  const handleRegister = useCallback(() => {
     setIsAuthenticated(true);
-    setIsLoading(false);
-  };
+  }, []);
 
-  const toggleRegister = () => {
+  const toggleRegister = useCallback(() => {
     setIsRegistering(!isRegistering);
-  };
+  }, [isRegistering]);
 
-  if (isLoading) {
-    return <Loader />;
-  }
+  const loginOrRegister = useMemo(() => {
+    if (isRegistering) {
+      return <Register onRegister={handleRegister} onToggleLogin={toggleRegister} />;
+    }
+    return <Login onLogin={handleLogin} onToggleRegister={toggleRegister} />;
+  }, [isRegistering, handleRegister, toggleRegister, handleLogin]);
+
 
   if (!isAuthenticated) {
-    return isRegistering ? (
-      <Register onRegister={handleRegister} onToggleLogin={toggleRegister} />
-    ) : (
-      <Login onLogin={handleLogin} onToggleRegister={toggleRegister} />
-    );
+    return loginOrRegister;
   }
 
   return (
     <Container maxWidth="md">
+      <Helmet><title>Панель Администратора</title></Helmet>
       <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
         <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="20px">
           <Typography variant="h4" gutterBottom>
@@ -115,7 +95,10 @@ const AdminPanel: React.FC = () => {
             variant="contained"
             color="secondary"
             startIcon={<LogoutIcon />}
-            onClick={() => AuthService.logout()}
+            onClick={() => {
+              AuthService.logout();
+              setIsAuthenticated(false);
+            }}
           >
             Выйти
           </Button>
@@ -123,27 +106,28 @@ const AdminPanel: React.FC = () => {
         <Button variant="contained" color="primary" onClick={handleCreate} style={{ marginBottom: '20px' }}>
           Создать новую страницу
         </Button>
-        <List>
-          {pages.map((page) => (
-            <ListItem key={page._id} button onClick={() => handleEdit(page)}>
-              <ListItemText primary={page.title} secondary={page.path} />
-              <ListItemSecondaryAction>
-                <IconButton
-                  edge="end"
-                  aria-label="open"
-                  component="a"
-                  href={`/${page.path}`}
-                  target="_blank"
-                >
-                  <OpenInNewIcon />
-                </IconButton>
-                <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(page._id)}>
-                  <DeleteIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
-          ))}
-        </List>
+
+          <List>
+            {pages.map((page) => (
+              <ListItem key={page._id} button onClick={() => handleEdit(page)}>
+                <ListItemText primary={page.title} secondary={page.path} />
+                <ListItemSecondaryAction>
+                  <IconButton
+                    edge="end"
+                    aria-label="open"
+                    component="a"
+                    href={`/${page.path}`}
+                    target="_blank"
+                  >
+                    <OpenInNewIcon />
+                  </IconButton>
+                  <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(page._id)}>
+                    <DeleteIcon />
+                  </IconButton>
+                </ListItemSecondaryAction>
+              </ListItem>
+            ))}
+          </List>
         <Box display="flex" justifyContent="center" marginTop="20px">
           <Pagination
             count={totalPages}

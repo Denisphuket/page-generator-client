@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button, TextField, Container, Paper, Typography, Box } from '@mui/material';
 import AuthService from '../services/AuthService';
+import {Helmet} from "react-helmet-async";
 
 const Login: React.FC<{ onLogin: () => void; onToggleRegister: () => void }> = ({ onLogin, onToggleRegister }) => {
   const [username, setUsername] = useState('');
@@ -18,6 +19,7 @@ const Login: React.FC<{ onLogin: () => void; onToggleRegister: () => void }> = (
 
   return (
     <Container maxWidth="sm">
+      <Helmet><title>Вход</title></Helmet>
       <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
         <Typography variant="h4" gutterBottom>
           Вход для администратора

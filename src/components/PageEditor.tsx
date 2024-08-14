@@ -14,6 +14,7 @@ const PageEditor: React.FC<PageEditorProps> = ({ open, onClose, onSave, page }) 
   const [path, setPath] = useState('');
   const [html, setHtml] = useState('');
   const [images, setImages] = useState<{ [key: string]: string }>({});
+  const [yandexMetrikaId, setYandexMetrikaId] = useState(''); // Поле для ID Яндекс.Метрики
   const [error, setError] = useState(''); // Для отображения ошибок
 
   useEffect(() => {
@@ -22,14 +23,16 @@ const PageEditor: React.FC<PageEditorProps> = ({ open, onClose, onSave, page }) 
       setPath(page.path);
       setHtml(page.html);
       setImages(page.images || {});
+      setYandexMetrikaId(page.yandexMetrikaId || ''); // Подтягиваем ID Яндекс.Метрики при редактировании
     } else {
       setTitle('');
       setPath('');
       setHtml('');
       setImages({});
+      setYandexMetrikaId(''); // Очищаем ID Яндекс.Метрики при создании новой страницы
       setError('');
     }
-  }, [page, open]); // Добавил open в зависимости, чтобы очищать инпуты при создании новой страницы
+  }, [page, open]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -50,7 +53,7 @@ const PageEditor: React.FC<PageEditorProps> = ({ open, onClose, onSave, page }) 
   };
 
   const handleSave = async () => {
-    const newPage = { ...page, title, path, html, images };
+    const newPage = { ...page, title, path, html, images, yandexMetrikaId }; // Добавляем ID Яндекс.Метрики
     try {
       await onSave(newPage);
       onClose();
@@ -86,6 +89,13 @@ const PageEditor: React.FC<PageEditorProps> = ({ open, onClose, onSave, page }) 
           rows={6}
           value={html}
           onChange={(e) => setHtml(e.target.value)}
+        />
+        <TextField
+          margin="dense"
+          label="ID Яндекс.Метрики"
+          fullWidth
+          value={yandexMetrikaId}
+          onChange={(e) => setYandexMetrikaId(e.target.value)}
         />
         {error && <p style={{ color: 'red' }}>{error}</p>}
         <Button variant="contained" component="label" style={{ marginTop: '10px' }}>

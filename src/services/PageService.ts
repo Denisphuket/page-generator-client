@@ -29,17 +29,8 @@ const getPages = async (page = 1, limit = 10) => {
 
 // Получение страницы по пути
 const getPageByPath = async (path: string) => {
-  const token = AuthService.getToken();
 
-  if (!token) {
-    throw new Error('No token available');
-  }
-
-  const response = await fetch(`${API_URL}/${path}`, {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
+  const response = await fetch(`${API_URL}/${path}`);
 
   if (!response.ok) {
     if (response.status === 401 || response.status === 403) {

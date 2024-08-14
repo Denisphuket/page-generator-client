@@ -68,16 +68,13 @@ const PageView: React.FC = () => {
   useEffect(() => {
     const fetchPage = async () => {
       if (path) {
-        setLoading(true);
         try {
           const fetchedPage = await PageService.getPageByPath(path);
-          if (!fetchedPage) {
-            navigate('/404');
-          } else {
+          if (fetchedPage) {
             setPage(fetchedPage);
           }
         } catch (error) {
-          console.error("Failed to fetch page", error);
+          console.error('Failed to fetch page', error);
           navigate('/404');
         } finally {
           setLoading(false);
@@ -86,6 +83,33 @@ const PageView: React.FC = () => {
     };
     fetchPage();
   }, [path, navigate]);
+
+  useEffect(() => {
+    if (page?.yandexMetrikaId) {
+      const script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.async = true;
+      script.innerHTML = `
+        (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+        m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+        (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+        ym(${page.yandexMetrikaId}, "init", {
+          clickmap:true,
+          trackLinks:true,
+          accurateTrackBounce:true,
+          webvisor:true
+        });
+      `;
+      document.body.appendChild(script);
+
+      const noScript = document.createElement('noscript');
+      noScript.innerHTML = `
+        <div><img src="https://mc.yandex.ru/watch/${page.yandexMetrikaId}" style="position:absolute; left:-9999px;" alt="" /></div>
+      `;
+      document.body.appendChild(noScript);
+    }
+  }, [page]);
 
   if (loading) {
     return (
@@ -103,9 +127,8 @@ const PageView: React.FC = () => {
   // Извлечение заголовка страницы
   const parser = new DOMParser();
   const doc = parser.parseFromString(page.html, 'text/html');
-  const pageTitle = doc.title;
+  const pageTitle = doc.title || 'Default Title';
 
-  // Заменяем {{image}} плейсхолдеры на реальные изображения
   const renderedHtml = page.html.replace(/{{(image\d+)}}/g, (match: any, marker: string) => {
     return page.images[marker] ? `${page.images[marker]}` : match;
   });
@@ -114,7 +137,6 @@ const PageView: React.FC = () => {
     <>
       <Helmet>
         <title>{pageTitle}</title>
-        {/* Здесь можно добавить другие мета-теги */}
       </Helmet>
       <div dangerouslySetInnerHTML={{ __html: renderedHtml }} />
     </>
