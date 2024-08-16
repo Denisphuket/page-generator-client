@@ -14,7 +14,7 @@ const AdminPanel: React.FC = () => {
   const [pages, setPages] = useState<any[]>([]);
   const [editingPage, setEditingPage] = useState<any | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(AuthService.getToken() ? true : false);
+  const [isAuthenticated, setIsAuthenticated] = useState(!!AuthService.getToken());
   const [isRegistering, setIsRegistering] = useState(false);
   const [page, setPage] = useState(1); // Текущая страница
   const [totalPages, setTotalPages] = useState(1); // Общее количество страниц
@@ -25,14 +25,18 @@ const AdminPanel: React.FC = () => {
 
   const fetchPages = useCallback(async (pageNumber: number) => {
     try {
-      const response = await PageService.getPages(pageNumber, 10); // Передаем номер страницы и лимит
-      setPages(response.pages);
-      setTotalPages(response.pagesCount);
+      console.log('fetchPages')
+      if(isAuthenticated){
+        const response = await PageService.getPages(pageNumber, 10); // Передаем номер страницы и лимит
+        setPages(response.pages);
+        setTotalPages(response.pagesCount);
+      }
+
     } catch (error) {
       console.error(error);
     } finally {
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const handlePageChange = useCallback((event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
@@ -48,8 +52,8 @@ const AdminPanel: React.FC = () => {
     setIsEditorOpen(true);
   }, []);
 
-  const handleSave = useCallback(async (page: any) => {
-    await PageService.savePage(page);
+  const handleSave = useCallback(async (pageObj: any) => {
+    await PageService.savePage(pageObj);
     fetchPages(page);
     setIsEditorOpen(false);
   }, [fetchPages]);
@@ -109,7 +113,7 @@ const AdminPanel: React.FC = () => {
 
           <List>
             {pages.map((page) => (
-              <ListItem key={page._id} button onClick={() => handleEdit(page)}>
+              <ListItem key={page.id} onClick={() => handleEdit(page)}>
                 <ListItemText primary={page.title} secondary={page.path} />
                 <ListItemSecondaryAction>
                   <IconButton
@@ -121,7 +125,7 @@ const AdminPanel: React.FC = () => {
                   >
                     <OpenInNewIcon />
                   </IconButton>
-                  <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(page._id)}>
+                  <IconButton edge="end" aria-label="delete" onClick={() => handleDelete(page.id)}>
                     <DeleteIcon />
                   </IconButton>
                 </ListItemSecondaryAction>

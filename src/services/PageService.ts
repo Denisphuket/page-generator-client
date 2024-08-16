@@ -4,13 +4,21 @@ const API_URL = `${process.env.REACT_APP_API_URL}/pages`;
 
 // Получение всех страниц
 const getPages = async (page = 1, limit = 10) => {
+  // Преобразуем значения page и limit в числа и проверяем, что они валидны
+  const pageNumber = Number(page);
+  const limitNumber = Number(limit);
+
+  if (isNaN(pageNumber) || isNaN(limitNumber)) {
+    throw new Error('Page and limit query parameters must be valid numbers.');
+  }
+
   const token = AuthService.getToken();
 
   if (!token) {
     throw new Error('No token available');
   }
 
-  const response = await fetch(`${API_URL}?page=${page}&limit=${limit}`, {
+  const response = await fetch(`${API_URL}?page=${pageNumber}&limit=${limitNumber}`, {
     headers: {
       'Authorization': `Bearer ${token}`,
     },
@@ -26,6 +34,8 @@ const getPages = async (page = 1, limit = 10) => {
 
   return await response.json();
 };
+
+
 
 // Получение страницы по пути
 const getPageByPath = async (path: string) => {
