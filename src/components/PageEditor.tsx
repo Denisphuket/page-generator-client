@@ -18,13 +18,16 @@ const PageEditor: React.FC<PageEditorProps> = ({ open, onClose, onSave, page }) 
   const [error, setError] = useState(''); // Для отображения ошибок
 
   useEffect(() => {
+    console.log('PageEditor useEffect triggered');
     if (page) {
-      setTitle(page.title);
-      setPath(page.path);
-      setHtml(page.html);
+      console.log('Loading page data', page);
+      setTitle(page.title || '');
+      setPath(page.path || '');
+      setHtml(page.html || '');
       setImages(page.images || {});
       setYandexMetrikaId(page.yandexMetrikaId || ''); // Подтягиваем ID Яндекс.Метрики при редактировании
     } else {
+      console.log('Resetting fields for new page');
       setTitle('');
       setPath('');
       setHtml('');
@@ -52,10 +55,18 @@ const PageEditor: React.FC<PageEditorProps> = ({ open, onClose, onSave, page }) 
     setImages(updatedImages);
   };
 
+  const preparePageData = (page: any) => {
+    const { id, createdAt, updatedAt, ...cleanedPage } = page;
+    return cleanedPage;
+  };
+
+
   const handleSave = async () => {
     const newPage = { ...page, title, path, html, images, yandexMetrikaId }; // Добавляем ID Яндекс.Метрики
+    console.log(JSON.stringify(images))
+    const cleanedPageObj = preparePageData(newPage);
     try {
-      await onSave(newPage);
+      await onSave(cleanedPageObj);
       onClose();
     } catch (error) {
       setError('Ссылка уже существует. Пожалуйста, выберите другой путь.');
@@ -103,9 +114,10 @@ const PageEditor: React.FC<PageEditorProps> = ({ open, onClose, onSave, page }) 
           <input type="file" accept="image/*" hidden onChange={handleImageChange} />
         </Button>
         <div style={{ marginTop: '10px' }}>
-          {Object.entries(images).map(([marker, src]) => (
+
+          {Object.entries(images || {}).map(([marker, src]) => (
             <div key={marker} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-              <img src={src} alt={marker} style={{ width: '100px', marginRight: '10px' }} />
+              {src && <img src={src} alt={marker} style={{ width: '100px', marginRight: '10px' }} />}
               <TextField
                 value={`{{${marker}}}`}
                 InputProps={{

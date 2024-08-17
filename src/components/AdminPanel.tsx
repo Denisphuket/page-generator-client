@@ -20,6 +20,7 @@ const AdminPanel: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1); // Общее количество страниц
 
   useEffect(() => {
+    console.log('AdminPanel useEffect fetchPages')
     fetchPages(page);
   }, [page]);
 

@@ -66,6 +66,7 @@ const PageView: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('PageView useEffect')
     const fetchPage = async () => {
       if (path) {
         try {
